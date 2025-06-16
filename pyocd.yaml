@@ -1,0 +1,10 @@
+pack:
+  - MindMotion.MM32G0001_DFP.1.0.1.pack
+
+target_override: mm32g0001a1tc
+
+frequency: 1000000
+
+
+#  --target mm32g0001a1tc  --pack MindMotion.MM32G0001_DFP.1.0.1.pack
+#  --config pyocd.yaml
