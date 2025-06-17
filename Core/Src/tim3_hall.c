@@ -1,7 +1,7 @@
 /***********************************************************************************************************************
-    @file    main.c
+    @file    tim3_hall.c
     @author  FAE Team
-    @date    17-Nov-2023
+    @date    14-Nov-2023
     @brief   THIS FILE PROVIDES ALL THE SYSTEM FUNCTIONS.
   **********************************************************************************************************************
     @attention
@@ -27,13 +27,12 @@
   *********************************************************************************************************************/
 
 /* Define to prevent recursive inclusion */
-#define _MAIN_C_
+#define _TIM3_HALL_C_
 
 /* Files include */
+#include <stdio.h>
 #include "platform.h"
-//#include "gpio_led_toggle.h"
 #include "tim3_hall.h"
-#include "main.h"
 
 /**
   * @addtogroup MM32G0001_LibSamples
@@ -41,12 +40,12 @@
   */
 
 /**
-  * @addtogroup GPIO
+  * @addtogroup TIM3
   * @{
   */
 
 /**
-  * @addtogroup GPIO_LED_Toggle
+  * @addtogroup TIM3_Hall
   * @{
   */
 
@@ -61,21 +60,60 @@
 /* Private functions **************************************************************************************************/
 
 /***********************************************************************************************************************
-  * @brief  This function is main entrance
-  * @note   main
+  * @brief
+  * @note   none
   * @param  none
   * @retval none
   *********************************************************************************************************************/
-int main(void)
-{
-    PLATFORM_Init();
+void TIM_Configure(void){
+    GPIO_InitTypeDef GPIO_InitStruct;
+    TIM_OCInitTypeDef TIM_OCInitStruct;
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStruct;
 
-//    GPIO_LED_Toggle_Sample();
+    // PWM频率 = 1kHz（预分频后时钟1MHz，ARR=1000）
+    uint32_t TimerPeriod = 1000 - 1;
 
-    TIM_Hall_Sample();
+    RCC_APB1PeriphClockCmd(RCC_APB1ENR_TIM3, ENABLE);
+    RCC_AHBPeriphClockCmd(RCC_AHBENR_GPIOA, ENABLE);
 
-    while (1)
-    {
+    // TIM3基础配置
+    TIM_TimeBaseStruct.TIM_Prescaler = 48 - 1;  // 48MHz/48 = 1MHz
+    TIM_TimeBaseStruct.TIM_Period = TimerPeriod;
+    TIM_TimeBaseStruct.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStruct);
+
+    // TIM3通道1 PWM配置
+    TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM1;
+    TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Enable;
+    TIM_OCInitStruct.TIM_Pulse = 0;  // 初始占空比0%
+    TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_High;
+    TIM_OC1Init(TIM3, &TIM_OCInitStruct);
+
+    // GPIO配置（PA11 -> TIM3_CH1）
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF_4);  // 确认AF编号！
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_11;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_High;
+    GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    TIM_Cmd(TIM3, ENABLE);
+    TIM_CtrlPWMOutputs(TIM3, ENABLE);  // 关键！
+}
+
+void TIM_Hall_Sample(void){
+    printf("\r\nTest %s", __FUNCTION__);
+    TIM_Configure();
+    while (1) {
+        // 渐亮效果
+        for(uint16_t i=0; i<1000; i++) {
+            TIM_SetCompare1(TIM3,i);
+            PLATFORM_DelayMS(1);  // 调整延时控制渐变速度
+        }
+        // 渐暗效果
+        for(uint16_t i=1000; i>0; i--) {
+            TIM_SetCompare1(TIM3,i);
+            PLATFORM_DelayMS(1);
+        }
     }
 }
 

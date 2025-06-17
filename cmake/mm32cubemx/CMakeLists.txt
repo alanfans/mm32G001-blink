@@ -25,7 +25,8 @@ target_sources(mm32cubemx INTERFACE
     ../../Core/Src/main.c
     ../../Core/Src/mm32g0001_it.c
     ../../Core/Src/gpio_led_toggle.c
-    ../../Core/Src/platform.c
+	../../Core/Src/platform.c
+    ../../Core/Src/tim3_hall.c
     
     ../../Drivers/HAL_Lib/Src/hal_adc.c
     ../../Drivers/HAL_Lib/Src/hal_crc.c
@@ -42,7 +43,7 @@ target_sources(mm32cubemx INTERFACE
     ../../Drivers/HAL_Lib/Src/hal_syscfg.c
     ../../Drivers/HAL_Lib/Src/hal_tim.c
     ../../Drivers/HAL_Lib/Src/hal_uid.c
-    ../../Drivers/HAL_Lib/Src/hal_usart.c  
+    ../../Drivers/HAL_Lib/Src/hal_usart.c
     
     ../../Drivers/startup/system_mm32g0001.c
     ../../Drivers/startup/startup_mm32g0001_keil.S
